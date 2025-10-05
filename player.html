@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="el">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PapaRadio Footer Player</title>
+<style>
+body { margin:0; background:#1f1f1f; font-family:Arial, sans-serif; color:white; }
+.footer-player {
+  position:fixed; bottom:0; left:0; right:0; height:80px;
+  background:#242323; display:flex; align-items:center; padding:0 20px; gap:15px;
+  box-shadow:0 -2px 8px rgba(0,0,0,0.6); z-index:999999;
+}
+.cover { width:60px; height:60px; border-radius:8px; object-fit:cover; background:#333; }
+.track-info { flex:1; overflow:hidden; display:flex; flex-direction:column; justify-content:center; }
+.track-title { font-size:14px; font-weight:bold; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.track-artist { font-size:12px; color:#aaa; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.controls button { background:none; border:none; color:white; font-size:28px; cursor:pointer; padding:5px; }
+</style>
+</head>
+<body>
+
+<div class="footer-player">
+  <img id="cover" class="cover" src="//www.radiojar.com/img/sample_images/Radio_Stations_Avatar_BLUE.png" alt="Cover">
+  <div class="track-info">
+    <div id="title" class="track-title">Σύνδεση...</div>
+    <div id="artist" class="track-artist"></div>
+  </div>
+  <div class="controls">
+    <button id="play">▶</button>
+    <button id="pause" style="display:none;">❚❚</button>
+  </div>
+</div>
+
+<audio id="audio" src="http://stream.radiojar.com/y3tgenqvtrcwv"></audio>
+<script src="//www.radiojar.com/wrappers/api-plugins/v1/radiojar-min.js"></script>
+<script>
+const audio=document.getElementById('audio');
+const playBtn=document.getElementById('play');
+const pauseBtn=document.getElementById('pause');
+const titleEl=document.getElementById('title');
+const artistEl=document.getElementById('artist');
+const coverEl=document.getElementById('cover');
+
+// RadioJar init
+rjq('#audio').radiojar('player',{
+  streamName:'y3tgenqvtrcwv',
+  enableUpdates:true,
+  defaultImage:'//www.radiojar.com/img/sample_images/Radio_Stations_Avatar_BLUE.png',
+  autoplay:false
+});
+
+// Metadata
+rjq('#audio').on('rj-track-load-event',(e,data)=>{
+  titleEl.textContent=data.title||'PapaRadio';
+  artistEl.textContent=data.artist||'';
+  coverEl.src=data.thumb||'//www.radiojar.com/img/sample_images/Radio_Stations_Avatar_BLUE.png';
+});
+
+// Play/Pause
+playBtn.onclick=()=>{audio.play(); playBtn.style.display='none'; pauseBtn.style.display='inline';};
+pauseBtn.onclick=()=>{audio.pause(); playBtn.style.display='inline'; pauseBtn.style.display='none';};
+
+// Έξυπνο autoplay
+function tryAutoplay(){
+  audio.play().then(()=>{playBtn.style.display='none'; pauseBtn.style.display='inline';})
+  .catch(()=>{document.body.addEventListener('click', firstClickPlay, {once:true});});
+}
+function firstClickPlay(){audio.play(); playBtn.style.display='none'; pauseBtn.style.display='inline';}
+window.addEventListener('load', tryAutoplay);
+</script>
+
+</body>
+</html>
